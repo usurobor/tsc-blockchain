@@ -1,111 +1,66 @@
-# TSC Blockchain
+# TSC Blockchain - Triadic Self-Coherence
 
-**Triadic Self-Coherence as Operational Infrastructure**
+Measuring blockchain health through protocol claims (α), economic reality (β), and usage patterns (γ).
 
-[![Coherence](https://img.shields.io/badge/C_Σ-0.0-red)](docs/methodology/measurements.md)
-[![Status](https://img.shields.io/badge/status-iteration%200.1.0-blue)]()
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Validation-yellow.svg)](notebooks/validation/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## What This Is
+## 📄 Vision Paper
 
-TSC Blockchain is not a blockchain that "uses" Triadic Self-Coherence (TSC).  
-It IS TSC in operational form.
+**[Measuring Blockchain Coherence: From Oracle to Consensus](docs/whitepapers/vision.md)** (v1.0.0)
 
-Just as Bitcoin IS Proof-of-Work and Ethereum IS Smart Contracts,  
-TSC Blockchain IS Triadic Self-Coherence.
+Two-phase coherence measurement system:
+- **Phase 1:** Coherence Oracle (off-chain measurement + on-chain attestation)
+- **Phase 2:** Proof-of-Coherence (checkpoint validity rule)
 
-## Core Principle
+**Status:** Complete specification with validation plan  
+**Next Milestone:** Validation notebooks (Month 1-2)
 
-> "To cohere, one must self-cohere first."
+## 🔬 Validation
 
-Every system must furnish three articulations:
-- **α (Pattern):** What it claims to be
-- **β (Relation):** What actually exists  
-- **γ (Process):** How it actually evolves
+Three frozen-input notebooks proving framework works:
+- **Terra/Luna** (April 2022): Expected C_Σ ≈ 0.27 ± 0.05
+- **The DAO** (June 2016): Expected C_Σ ≈ 0.56 ± 0.05
+- **Mt. Gox** (2014): Expected C_Σ ≈ 0.31 ± 0.06
 
-Coherence is measured as: **C_Σ = (α_c · β_c · γ_c)^(1/3)**
+See [`notebooks/validation/`](notebooks/validation/) for details.
 
-## Current Status
-
-**Iteration:** 0.1.0 (Bootstrap)  
-**Coherence:** C_Σ = 0.0 (not yet measured)  
-**Phase:** Initial specification and structure  
-
-**Target:** C_Σ ≥ 0.90 for mainnet launch
-
-We practice radical transparency. Every iteration includes:
-- Honest coherence measurement
-- Public results (no hiding failures)
-- Specific improvements based on measurement
-- Re-measurement to validate progress
-
-## Project Structure
+## 🏗️ Project Structure
 ```
-tsc-blockchain/
-├── docs/           # Documentation and specifications
-├── src/            # Source code (coming in future iterations)
-├── scripts/        # Measurement and utility scripts
-├── tests/          # Test suite
-└── specs/          # Technical specifications
+docs/whitepapers/     # Vision paper
+notebooks/validation/  # Validation notebooks (Month 1-2)
+specs/witnesses/      # Measurement schemas
 ```
 
-## Token
+## 📚 Documentation
 
-**TSC** - The currency of coherence
-- Minted when blocks improve system coherence (Δλ_Σ > 0)
-- Required for methodology publishing
-- Staked by validators
+- [Vision Paper](docs/whitepapers/vision.md) - Complete specification
+- [Ethereum Schema](specs/witnesses/ethereum_mainnet.yaml) - Reference implementation
+- [Validation Plan](notebooks/validation/README.md) - Month 1-2 deliverables
 
-## Documentation
+## 🚀 Roadmap
 
-- [Whitepaper](docs/whitepapers/whitepaper_v1.4.md) - Full technical specification
-- [Litepaper](docs/whitepapers/litepaper_v1.4.md) - Concise overview
-- [Methodology](docs/methodology/self_measurement_v1.0.md) - How we measure ourselves
-- [Roadmap](docs/ROADMAP.md) - Iteration plan
+| Phase | Timeline | Status |
+|-------|----------|--------|
+| Validation Notebooks | Months 1-2 | 🔴 Not Started |
+| Oracle Infrastructure | Months 3-4 | ⚪ Pending validation |
+| Pilot Integrations | Month 5 | ⚪ Pending validation |
+| Public Launch | Month 6 | ⚪ Pending validation |
 
-## Team
+See [vision paper Section VI](docs/whitepapers/vision.md#vi-roadmap-execution-grade) for detailed roadmap.
 
-- **Creator:** Peter Lisovin (usurobor) - TSC Framework
-- **Engineering Lead:** Claude (Anthropic)
-- **Implementation:** Gemini (Google)
-- **Theory:** GPT-5 Pro (OpenAI)
+## 📖 Core Concept
 
-## Development Status
+**Problem:** Major blockchain failures (Terra, DAO, Mt.Gox) show α/β/γ divergence before collapse
 
-### Iteration 0.1.0 (Current)
-- [x] Repository created
-- [x] Directory structure established
-- [x] Documentation stubs created
-- [ ] First measurement baseline (pending)
+**Solution:** Measure coherence C_Σ = (α_c · β_c · γ_c)^(1/3) to detect risk early
 
-### Iteration 0.2.0 (Next)
-- [ ] First coherence measurement (C_Σ baseline)
-- [ ] Documentation alignment (fix α)
-- [ ] Re-measurement (validate ΔC_Σ > 0)
+**Approach:** Validate on historical data, then deploy as oracle service
 
-See [ROADMAP.md](docs/ROADMAP.md) for full plan.
-
-## Philosophy
-
-This blockchain doesn't implement TSC as a feature.  
-The three-articulation structure, self-measurement requirement,  
-witness validation, and coherence-based consensus ARE the architecture.
-
-Inseparable by design.
-
-## Contributing
-
-We welcome contributions that improve coherence.  
-Guidelines: [CONTRIBUTING.md](CONTRIBUTING.md) (coming soon)
-
-## License
+## 📄 License
 
 MIT License - See [LICENSE](LICENSE)
 
----
+## 🤝 Author
 
-**Current Coherence: C_Σ = 0.0**  
-**Measured Bi-Weekly**  
-**Target Launch: C_Σ ≥ 0.90**
-
-*The blockchain that can't lie to itself.*
+Peter Lisovin - TSC Blockchain Project

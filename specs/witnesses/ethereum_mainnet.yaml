@@ -1,0 +1,90 @@
+version: "1.0.0"
+chain: "ethereum-mainnet"
+checkpoint_frequency: "daily"
+window_size: 7200  # blocks (~1 day)
+
+alpha_requirements:
+  - id: block_time_target
+    type: range
+    claim: "12 s block time"
+    target: {ge: 11.0, le: 13.0, unit: "seconds"}
+    datasource: "rpc://<eth-rpc>"
+    query: "avg(diff(block.timestamp)) over window"
+    weight: 1.0
+    tolerance: 0.15
+
+  - id: finality_gasper
+    type: range
+    claim: "≤2 epochs to finality"
+    target: {le: 900, unit: "seconds"}
+    datasource: "beacon://<consensus-client>"
+    query: "time_to_finality_p95"
+    weight: 1.0
+    tolerance: 300
+
+  - id: validator_decentralization
+    type: range
+    claim: "No entity >25% stake"
+    target: {le: 0.25, unit: "fraction"}
+    datasource: "beacon://<consensus-client>"
+    query: "max(entity_stake_share)"
+    weight: 2.0
+    tolerance: 0.05
+
+  - id: erc20_transfer_safety
+    type: invariant
+    claim: "ERC20 transfers cannot reenter"
+    target: {holds: true}
+    datasource: "analyzer://mythril"
+    query: "check_invariant('no_reentrancy','transfer')"
+    weight: 2.0
+
+beta_sources:
+  rpc_endpoint: "https://<eth-rpc>"
+  beacon_endpoint: "https://<beacon-api>"
+  gas_market:
+    - source: "etherscan/gastracker"
+      metrics: ["base_fee","priority_fee_p50","priority_fee_p95"]
+  token_distribution:
+    - source: "etherscan/tokenholders"
+      metrics: ["top10_concentration","gini_coefficient"]
+
+gamma_features:
+  - id: tx_type_distribution
+    type: distribution
+    baseline: "s3://baselines/eth_txmix.parquet"
+    current: "query: tx_type_histogram over window"
+    distance_metric: "jensen_shannon"
+    datasource: "rpc://<eth-rpc>"
+
+  - id: gas_usage_stability
+    type: process
+    metric: "coefficient_of_variation(base_fee)"
+    threshold: {le: 0.5}
+    datasource: "etherscan/gastracker"
+
+  - id: validator_participation
+    type: range
+    target: {ge: 0.95, unit: "fraction"}
+    datasource: "beacon://<consensus-client>"
+    query: "active_validators / total_validators"
+
+scoring_config:
+  primitives:
+    range: "max(0, 1 - (x - target)_+ / tolerance)"
+    invariant: "1 if holds else 0"
+    distribution: "1 - JS_divergence(current, baseline)"
+    process: "max(0, 1 - distortion / tolerance)"
+  aggregation:
+    axis_scores: "geometric_mean"
+    global_coherence: "geometric_mean(α_c, β_c, γ_c)"
+  thresholds:
+    production: 0.80
+    warning: 0.60
+    critical: 0.40
+
+provenance:
+  method_version: "tsc-oracle-v1.0.0"
+  schema_version: "1.0.0"
+  implementation: "github.com/tsc-blockchain/oracle@<commit>"
+  frozen_inputs_hash: "sha256:<blob>"
