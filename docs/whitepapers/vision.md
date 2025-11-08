@@ -6,7 +6,7 @@ Peter Lisovin
 TSC Blockchain Project  
 November 2025
 
-**Document Version:** 1.1.0 (arXiv Submission Draft)  
+**Document Version:** 1.0.0 (arXiv Ready)  
 **Status:** Complete Specification with Validation Plan  
 **Next Milestone:** Validation notebooks (Month 1-2)  
 **Phase 1 Timeline:** 6 months to production oracle (contingent on validation)
@@ -19,9 +19,9 @@ November 2025
 
 Major blockchain blow-ups share one symptom: α (protocol claims), β (economic/implementation reality), and γ (emergent usage) diverge well before loss. No standard tool measures that divergence. We propose a two-phase program built on Triadic Self-Coherence (TSC):
 
-1. **Coherence Oracle (Phase-1):** Specification for off-chain measurement and on-chain attestation of per-chain coherence \(C_\Sigma\). Validation planned for Month 1-2.
+1. **Coherence Oracle (Phase-1):** Specification for off-chain measurement and on-chain attestation of per-chain coherence C_Σ. Validation planned for Month 1-2.
 
-2. **Proof-of-Coherence (Phase-2):** A checkpoint validity rule layered on PoS/PBFT requiring \(C_\Sigma \ge \Theta\) or friction improvement \(\Delta\lambda_\Sigma \ge \delta\).
+2. **Proof-of-Coherence (Phase-2):** A checkpoint validity rule layered on PoS/PBFT requiring C_Σ ≥ Θ or friction improvement Δλ_Σ ≥ δ.
 
 Phase-1 specification provides the framework; the validation notebooks prove whether the framework works as designed.
 
@@ -37,42 +37,42 @@ Given a time window W on a chain:
 - **β (Economics/Relation):** Deployed code and state—stake distribution, fee/MEV dynamics, realized performance.
 - **γ (Usage/Process):** Trajectory—transaction mix, retention/turnover, upgrade adoption, incident timelines.
 
-We compute \(\alpha_c, \beta_c, \gamma_c \in [0,1]\) and aggregate:
+We compute α_c, β_c, γ_c ∈ [0,1] and aggregate:
 
-**\(C_\Sigma = (\alpha_c \cdot \beta_c \cdot \gamma_c)^{1/3}, \quad \lambda_\Sigma = -\ln(\max(C_\Sigma, \epsilon))\)**
+**C_Σ = (α_c · β_c · γ_c)^(1/3),    λ_Σ = -ln(max(C_Σ, ε))**
 
-with numerical floor **\(\epsilon = 10^{-12}\)**.
+with numerical floor **ε = 10^(-12)**.
 
-**Degeneracy guard:** If any axis is 0, \(C_\Sigma = 0\) (no compensation from other axes).
+**Degeneracy guard:** If any axis is 0, C_Σ = 0 (no compensation from other axes).
 
 **Default thresholds:**
-- Production \(\ge 0.80\)
-- Watch \(0.60\text{-}0.80\)
-- Hazard \(0.40\text{-}0.60\)
-- Critical \(< 0.40\)
+- Production ≥ 0.80
+- Watch 0.60-0.80
+- Hazard 0.40-0.60
+- Critical < 0.40
 
 ### 1.2 Case Studies (Projected Scores Based on TSC Framework)
 
 #### Terra/Luna (pre-collapse, April 2022):
-- **Projected score:** \(C_\Sigma \approx 0.27 \pm 0.05\) (Critical)
+- **Projected score:** C_Σ ≈ 0.27 ± 0.05 (Critical)
 - **Basis:** Estimated using TSC framework on known facts:
-  - \(\alpha_c \approx 0.65\) (protocol claims documented)
-  - \(\beta_c \approx 0.08\) (Anchor sustainability ratio, reserve coverage)
-  - \(\gamma_c \approx 0.38\) (usage patterns showed stress)
+  - α_c ≈ 0.65 (protocol claims documented)
+  - β_c ≈ 0.08 (Anchor sustainability ratio, reserve coverage)
+  - γ_c ≈ 0.38 (usage patterns showed stress)
 - **Status:** TO BE VALIDATED in notebook (Month 1-2)
 - Validation will either confirm score or refine methodology
 
 #### The DAO (June 2016):
-- **Projected score:** \(C_\Sigma \approx 0.56 \pm 0.05\) (Hazard)
+- **Projected score:** C_Σ ≈ 0.56 ± 0.05 (Hazard)
 - **Basis:** β (implementation vs claim) dominated risk
 - **Status:** TO BE VALIDATED in notebook (Month 1-2)
 
 #### Bitcoin Identity Drift (cash→gold):
-- **Projected score:** \(C_\Sigma \approx 0.66\) (Watch)
+- **Projected score:** C_Σ ≈ 0.66 (Watch)
 - **Basis:** Functional chain, measurable narrative drift
 - **Status:** TO BE VALIDATED in notebook (Month 1-2)
 
-**All values are projections.** Month 1-2 notebooks will compute scores from frozen snapshots; **if they differ by \(>\pm 0.05\), we tune witnesses before any infrastructure spend**.
+**All values are projections.** Month 1-2 notebooks will compute scores from frozen snapshots; **if they differ by >±0.05, we tune witnesses before any infrastructure spend**.
 
 ---
 
@@ -88,33 +88,33 @@ with numerical floor **\(\epsilon = 10^{-12}\)**.
 
 ### II.2 Witness Functions (Simplified for Validation)
 
-We compute distances and convert them to scores \(s \in [0,1]\).
+We compute distances and convert them to scores s ∈ [0,1].
 
-**\(W_{\alpha\beta}\) (claims ↔ implementation):**
+**W_αβ (claims ↔ implementation):**
 - Coverage: What fraction of α properties have checks?
 - Pass rate: What fraction of checks pass?
 - Severity: Penalize critical failures
-- Score: \(\alpha_c = w_1 \cdot (\text{coverage}) + w_2 \cdot (\text{pass\_rate}) - w_3 \cdot (\text{severity\_penalty})\), clipped to \([0,1]\)
+- Score: α_c = w₁·(coverage) + w₂·(pass_rate) - w₃·(severity_penalty), clipped to [0,1]
 
-**\(W_{\beta\gamma}\) (incentives ↔ behavior):**
+**W_βγ (incentives ↔ behavior):**
 - Expected use-mix p from β (fees, yields, latency)
 - Observed mix q from γ (actual transaction types)
-- Distance: Earth Mover's Distance \(d = \text{EMD}(p, q)\), normalized to \([0,1]\)
-- Score: \(\beta_c = 1 - d\)
+- Distance: Earth Mover's Distance d = EMD(p, q), normalized to [0,1]
+- Score: β_c = 1 - d
 
-**\(W_{\gamma\alpha}\) (behavior ↔ intent):**
-- Reference signature \(u(t)\) from α (intended usage pattern)
-- Observed trajectory \(v(t)\) from γ (actual behavior over time)
+**W_γα (behavior ↔ intent):**
+- Reference signature u(t) from α (intended usage pattern)
+- Observed trajectory v(t) from γ (actual behavior over time)
 - Distance: Normalized edit distance between sequences
-- Score: \(\gamma_c = 1 - \text{norm\_dist}(u, v)\)
+- Score: γ_c = 1 - norm_dist(u, v)
 
 **Future work:** More sophisticated witnesses (optimal transport, graph matching) may be explored in Phase 2 after base framework is validated.
 
 ### II.3 Global Witness Gates
 
-- **S₃ symmetry:** \(C_\Sigma\) invariant under axis permutation (within tolerance \(\tau_{\text{sym}}\))
-- **Stability:** VRF-seeded repeats; variance \(\le \tau_{\text{var}}\)
-- **Budget (Phase-1: report-only; Phase-2: enforced):** Report B and \(\eta = \Delta\lambda_\Sigma / B\) each run. In Phase-2, require \(B \le B_{\max}\) and \(\eta \ge \eta_{\min}\).
+- **S₃ symmetry:** C_Σ invariant under axis permutation (within tolerance τ_sym)
+- **Stability:** VRF-seeded repeats; variance ≤ τ_var
+- **Budget (Phase-1: report-only; Phase-2: enforced):** Report B and η = Δλ_Σ / B each run. In Phase-2, require B ≤ B_max and η ≥ η_min.
 
 **Missing-data policy:** Primitives that cannot be computed in a window are marked NA; their declared weights are added to an axis penalty bucket (no imputation). The NA mask is written to provenance.
 
@@ -194,13 +194,13 @@ GET /v1/coherence/{chain}
 | **Standard** (hot cache) | ≤ 60s | ≤ $1 | Primary consumption tier |
 | **Deep analysis** (optional) | ≤ 5 min | ≤ $5 | Adds heavier γ features, MEV |
 | **Cold start** (first run) | ≤ 10 min | ≤ $10 | First run initialization |
-| **Reproducibility** | N/A | N/A | ≥99.99% identical \(C_\Sigma\) for frozen inputs |
+| **Reproducibility** | N/A | N/A | ≥99.99% identical C_Σ for frozen inputs |
 
 ### III.4 Budget-Efficiency Gate: Example
 
 **Phase-1 defaults:**
-- \(B_{\max} = 10^6\) gas-equivalent units
-- \(\eta_{\min} = 10^{-6}\) (realistic threshold; will tune on testnet)
+- B_max = 10^6 gas-equivalent units
+- η_min = 10^(-6) (realistic threshold; will tune on testnet)
 
 **Example (Standard tier):**
 
@@ -212,21 +212,21 @@ Estimated costs:
 - **Total budget B: ~$2.50-4.50**
 
 Estimated improvement:
-- Before: \(C_\Sigma = 0.82 \to \lambda_\Sigma = 0.198\)
-- After: \(C_\Sigma = 0.84 \to \lambda_\Sigma = 0.174\)
-- **Improvement: \(\Delta\lambda_\Sigma \approx 0.024\)**
+- Before: C_Σ = 0.82 → λ_Σ = 0.198
+- After: C_Σ = 0.84 → λ_Σ = 0.174
+- **Improvement: Δλ_Σ ≈ 0.024**
 
 Budget-efficiency:
 ```
-η = Δλ_Σ / B ≈ 0.024 / 4.00 ≈ 6×10^-3
+η = Δλ_Σ / B ≈ 0.024 / 4.00 ≈ 6×10^(-3)
 ```
 
-Gate check: \(\eta \ge \eta_{\min} = 10^{-6}\)?  
+Gate check: η ≥ η_min = 10^(-6)?  
 ✓ **YES** (3 orders of magnitude headroom)
 
 **Units:** In Phase-1 the gate uses reported USD cost per checkpoint (operator-auditable via invoices); Phase-2 migrates to a gas-equivalent or fixed budget unit (with published weights) for cross-chain comparability.
 
-We will log \((\Delta\lambda_\Sigma, B, \eta)\) alongside each attestation.
+We will log (Δλ_Σ, B, η) alongside each attestation.
 
 **Note:** These are engineering estimates. Actual costs will be measured during implementation.
 
@@ -238,14 +238,14 @@ The validation notebooks are **THE critical first deliverable** because they est
 
 1. **Proves concept:** Can TSC detect incoherence retroactively?
 2. **Calibrates methodology:** Do scores match expected ranges?
-3. **Validates degeneracy:** Does low \(\beta_c\) collapse \(C_\Sigma\) as theory predicts?
+3. **Validates degeneracy:** Does low β_c collapse C_Σ as theory predicts?
 4. **Establishes reproducibility:** Can independent teams get same scores?
 
 #### The Fork: Two Possible Outcomes
 
 **Outcome A: Validation Succeeds**
-- Terra produces \(C_\Sigma \approx 0.27 \pm 0.05\) (critical threshold)
-- DAO produces \(C_\Sigma \approx 0.56 \pm 0.05\) (hazard threshold)
+- Terra produces C_Σ ≈ 0.27 ± 0.05 (critical threshold)
+- DAO produces C_Σ ≈ 0.56 ± 0.05 (hazard threshold)
 - Scores are reproducible (99%+ match across runs)
 - All global gates pass (S₃, variance, budget)
 
@@ -254,7 +254,7 @@ The validation notebooks are **THE critical first deliverable** because they est
 **→ Risk: LOW** (methodology works)
 
 **Outcome B: Validation Reveals Issues**
-- Terra produces \(C_\Sigma = 0.65\) (not critical as expected)
+- Terra produces C_Σ = 0.65 (not critical as expected)
 - OR scores not reproducible (variance >5%)
 - OR witness functions need tuning
 
@@ -278,18 +278,18 @@ Three public notebooks demonstrating reproducible retroactive measurement:
 
 1. **Terra/Luna notebook**
    - **Snapshot anchor:** as_of: 2022-04-15T00:00:00Z
-   - Expected: \(C_\Sigma \approx 0.27 \pm 0.05\)
+   - Expected: C_Σ ≈ 0.27 ± 0.05
    - If validated: Strong proof of concept
    - If not: Iterate on witness functions
 
 2. **The DAO notebook**
    - **Snapshot anchor:** as_of: 2016-06-10T00:00:00Z
-   - Expected: \(C_\Sigma \approx 0.56 \pm 0.05\)
+   - Expected: C_Σ ≈ 0.56 ± 0.05
    - Secondary validation of methodology
 
 3. **Mt. Gox notebook**
    - **Snapshot anchor:** as_of: 2014-02-10T00:00:00Z
-   - Expected: \(C_\Sigma \approx 0.31 \pm 0.06\)
+   - Expected: C_Σ ≈ 0.31 ± 0.06
    - Bitcoin-specific validation
 
 All notebooks will be public (GitHub) with frozen data snapshots, allowing independent verification. Block heights are resolved inside each notebook from the UTC timestamp anchor.
@@ -314,7 +314,7 @@ Phase-1 relies exclusively on **reproducible provenance** (stored in IPFS/Arweav
 - Input data hash
 - Method version (methodId)
 - Computation timestamp
-- Result \((C_\Sigma, \alpha_c, \beta_c, \gamma_c, \lambda_\Sigma)\)
+- Result (C_Σ, α_c, β_c, γ_c, λ_Σ)
 - Container image/Nix flake pin
 - Data source licenses
 
@@ -325,17 +325,17 @@ Phase-1 relies exclusively on **reproducible provenance** (stored in IPFS/Arweav
 ### III.7 Consumption Patterns (Concrete Use Cases)
 
 **Bridges:**
-- Accept transfers > $N only if \(C_\Sigma \ge 0.80\) AND \(\beta_c \ge 0.75\)
-- Alert when \(\Delta C_\Sigma < -0.10\) week-over-week
+- Accept transfers > $N only if C_Σ ≥ 0.80 AND β_c ≥ 0.75
+- Alert when ΔC_Σ < -0.10 week-over-week
 
 **Lenders:**
-- Map Loan-to-Value (LTV) from \(C_\Sigma\) with floor at 0.60
+- Map Loan-to-Value (LTV) from C_Σ with floor at 0.60
 - Linear interpolation between 0.60 and 0.80
 
 **Exchanges:**
-- Listing gates: Require \(C_\Sigma \ge 0.70\)
-- Watchlist: Flag when \(C_\Sigma < 0.60\)
-- Delisting consideration: \(C_\Sigma < 0.40\) for >30 days
+- Listing gates: Require C_Σ ≥ 0.70
+- Watchlist: Flag when C_Σ < 0.60
+- Delisting consideration: C_Σ < 0.40 for >30 days
 
 ---
 
@@ -344,14 +344,14 @@ Phase-1 relies exclusively on **reproducible provenance** (stored in IPFS/Arweav
 We integrate the coherence metric as a validity rule at checkpoints. This is a research direction contingent on Phase-1 validation success.
 
 **Checkpoint acceptance:**
-- If global gates pass AND \((C_\Sigma \ge \Theta\) OR \(\Delta\lambda_\Sigma \ge \delta)\): **accept**
+- If global gates pass AND (C_Σ ≥ Θ OR Δλ_Σ ≥ δ): **accept**
 - Else: **degraded mode** (rate-limit risky surfaces, quarantine incoherent contracts) until coherence recovers
 
 **Default parameters:**
-- Threshold: \(\Theta = 0.80\) (production)
-- Minimum improvement: \(\delta = 0.01\)
+- Threshold: Θ = 0.80 (production)
+- Minimum improvement: δ = 0.01
 
-**Economic sanity:** Reward proportional to leverage reduction \((\Delta\lambda_\Sigma)\), applying Budget-Efficiency gate network-wide to prevent "buying" coherence with unbounded compute.
+**Economic sanity:** Reward proportional to leverage reduction (Δλ_Σ), applying Budget-Efficiency gate network-wide to prevent "buying" coherence with unbounded compute.
 
 **Research questions for Phase-2:**
 1. Checkpoint frequency optimization
@@ -379,12 +379,12 @@ TSC **complements** existing infrastructure:
 
 | Tool | What It Measures | TSC Adds |
 |------|------------------|----------|
-| **Chainlink** | Price feeds, external data | Chain health metrics \((C_\Sigma\) as new data primitive) |
+| **Chainlink** | Price feeds, external data | Chain health metrics (C_Σ as new data primitive) |
 | **Gauntlet/Chaos Labs** | Economic simulation | Continuous measurement of actual vs modeled (β/γ alignment) |
 | **Formal Verification** | Code correctness | Measures if correct code produces intended economics (α/β/γ coherence) |
 | **Audits** | Point-in-time security | Continuous monitoring, drift detection |
 
-**Integration example:** DeFi protocol uses Chainlink for prices, Gauntlet for risk params, and TSC for collateral chain health. If TSC reports \(C_\Sigma < 0.60\) for a bridged chain, Gauntlet adjusts LTV down. Three complementary layers.
+**Integration example:** DeFi protocol uses Chainlink for prices, Gauntlet for risk params, and TSC for collateral chain health. If TSC reports C_Σ < 0.60 for a bridged chain, Gauntlet adjusts LTV down. Three complementary layers.
 
 ### V.2 What TSC Does Not Measure
 
@@ -401,12 +401,12 @@ TSC complements these tools by adding dimensional consistency measurement.
 **Validation risks (Month 1-2):**
 
 1. **Risk: Scores don't match projections**
-   - Terra produces \(C_\Sigma = 0.65\) instead of 0.27
+   - Terra produces C_Σ = 0.65 instead of 0.27
    - Mitigation: Iterate on witness functions, adjust weights
    - Learning: Discover which articulations need refinement
 
 2. **Risk: Poor reproducibility**
-   - Same input produces \(C_\Sigma = 0.27 \pm 0.15\) (too wide)
+   - Same input produces C_Σ = 0.27 ± 0.15 (too wide)
    - Mitigation: Stabilize computation, add determinism checks
    - Learning: Identify non-deterministic components
 
@@ -447,28 +447,28 @@ TSC complements these tools by adding dimensional consistency measurement.
 
 Supply schedule; finality target; fee model; validator/committee bounds; governance powers & thresholds; security assumptions; economic invariants (collateral/solvency/peg rules).
 
-### \(W_{\alpha\beta}\) (Scoring Sketch)
+### W_αβ (Scoring Sketch)
 
-\(\alpha_c = \text{clip}(w_1 \cdot (\text{coverage}) + w_2 \cdot (\text{pass\_rate}) - w_3 \cdot (\text{severity\_penalty})) \in [0,1]\)
+α_c = clip(w₁·(coverage) + w₂·(pass_rate) - w₃·(severity_penalty)) ∈ [0,1]
 
 where:
 - coverage = (properties_with_checks) / (total_properties)
 - pass_rate = (checks_passed) / (total_checks)
 - severity_penalty = weighted sum of critical failures
 
-### \(W_{\beta\gamma}\) (Distributional)
+### W_βγ (Distributional)
 
-Build expected use-mix p from β (fees, latency, yields). Observe q from transaction data. Earth Mover's Distance: \(d = \text{EMD}(p, q)\), normalize to \([0,1] \to \beta_c = 1-d\).
+Build expected use-mix p from β (fees, latency, yields). Observe q from transaction data. Earth Mover's Distance: d = EMD(p, q), normalize to [0,1] → β_c = 1-d.
 
-### \(W_{\gamma\alpha}\) (Drift)
+### W_γα (Drift)
 
-From α, derive reference signature \(u(t)\) (e.g., "cash-like": many micro-payments). Compare to observed \(v(t)\) via normalized edit distance \(\to \gamma_c = 1-\text{norm\_dist}(u,v)\).
+From α, derive reference signature u(t) (e.g., "cash-like": many micro-payments). Compare to observed v(t) via normalized edit distance → γ_c = 1-norm_dist(u,v).
 
 ### Global Witness Gates
 
-- **S₃ symmetry:** Recompute \(C_\Sigma\) under axis permutations; equality within tolerance
-- **Stability:** VRF-seeded repeats; variance \(\le \tau_{\text{var}}\)
-- **Budget:** \(B \le B_{\max}\) AND \(\eta = \Delta\lambda_\Sigma/B \ge \eta_{\min}\) (Phase-1 start at \(10^{-6}\))
+- **S₃ symmetry:** Recompute C_Σ under axis permutations; equality within tolerance
+- **Stability:** VRF-seeded repeats; variance ≤ τ_var
+- **Budget:** B ≤ B_max AND η = Δλ_Σ/B ≥ η_min (Phase-1 start at 10^(-6))
 
 ### Oracle Policy Templates
 
@@ -486,7 +486,7 @@ LTV = 0.50 + 0.30·(C_Σ - 0.60)/0.20, clamped to [0.50, 0.80]
 
 ## Appendix A — Scoring Primitives (Deterministic)
 
-Let \(\text{clip}(x) = \min(1, \max(0, x))\).
+Let clip(x) = min(1, max(0, x)).
 
 **Two-sided range [L, U]:**
 ```
@@ -518,7 +518,7 @@ s_dist = 1 - d
 s_proc = clip(1 - distortion / τ)
 ```
 
-Axis scores are geometric means of their per-witness scores; \(C_\Sigma\) is the geometric mean of axis scores.
+Axis scores are geometric means of their per-witness scores; C_Σ is the geometric mean of axis scores.
 
 ---
 
@@ -545,9 +545,9 @@ C_Σ
 ```
 
 **Key events:**
-- **Feb 2022:** \(C_\Sigma \approx 0.72\) (functional but \(\beta_c\) showing strain)
-- **Mar 2022:** \(C_\Sigma \approx 0.64\) (enters warning zone)
-- **Apr 2022:** \(C_\Sigma \approx 0.42\) (ALERT) ← **TSC would flag here**
+- **Feb 2022:** C_Σ ≈ 0.72 (functional but β_c showing strain)
+- **Mar 2022:** C_Σ ≈ 0.64 (enters warning zone)
+- **Apr 2022:** C_Σ ≈ 0.42 (ALERT) ← **TSC would flag here**
 - **May 9, 2022:** Depeg and collapse
 
 **Note:** Projected scores; validation notebook will verify.
@@ -677,7 +677,7 @@ A full bibliography with DOIs/URLs will be included in the arXiv submission.
 - **Include:** `.bib` with 5-8 core references (TSC framework, Terra/DAO post-mortems, EMD/edit-distance citations)
 - **Artifacts:** Link to validation notebooks repo when ready
 - **Diagrams:** Replace ASCII diagrams with vector PDFs if possible
-- **Math rendering:** Verify LaTeX escaping (e.g., \(C_\Sigma\), \(\lambda_\Sigma\))
+- **Math rendering:** Uses Unicode symbols for GitHub; convert to LaTeX for arXiv
 - **Placeholders:** Clearly marked in schema (e.g., `<eth-rpc>`, `<commit>`, `<blob>`, `<digest>`)
 
 ---
@@ -689,9 +689,9 @@ Phase-1 specification provides a complete framework for measuring blockchain coh
 **This honest, empirical approach is how engineering works:** specify, validate, iterate, deploy.
 
 **Next artifact to ship:** Three frozen-input notebooks proving TSC framework can retroactively detect coherence collapse before financial loss:
-- `terra_2022-04-15.ipynb` — target \(C_\Sigma \approx 0.27 \pm 0.05\)
-- `dao_2016-06-10.ipynb` — target \(C_\Sigma \approx 0.56 \pm 0.05\)
-- `mtgox_2014-02-10.ipynb` — target \(C_\Sigma \approx 0.31 \pm 0.06\)
+- `terra_2022-04-15.ipynb` — target C_Σ ≈ 0.27 ± 0.05
+- `dao_2016-06-10.ipynb` — target C_Σ ≈ 0.56 ± 0.05
+- `mtgox_2014-02-10.ipynb` — target C_Σ ≈ 0.31 ± 0.06
 
 Each outputs:
 - `attestation.json` (scores, CI, gates, cause map, B, η)
@@ -699,4 +699,4 @@ Each outputs:
 
 ---
 
-**End of v1.1.0**
+**End of v1.0.0**
