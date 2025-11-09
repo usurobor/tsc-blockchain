@@ -1,66 +1,146 @@
-# TSC Blockchain - Triadic Self-Coherence
+# TSC Blockchain
+
+**Measuring blockchain coherence using Triadic Self-Coherence (TSC) framework**
 
 Measuring blockchain health through protocol claims (α), economic reality (β), and usage patterns (γ).
 
-[![Status](https://img.shields.io/badge/Status-Validation-yellow.svg)](notebooks/validation/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[Measuring Blockchain Coherence: From Oracle to Consensus](docs/whitepapers/vision.md) (v1.1.0)
 
-## 📄 Vision Paper
-
-**[Measuring Blockchain Coherence: From Oracle to Consensus](docs/whitepapers/vision.md)** (v1.0.0)
+## Overview
 
 Two-phase coherence measurement system:
 - **Phase 1:** Coherence Oracle (off-chain measurement + on-chain attestation)
 - **Phase 2:** Proof-of-Coherence (checkpoint validity rule)
 
-**Status:** Complete specification with validation plan  
-**Next Milestone:** Validation notebooks (Month 1-2)
+**Status:** Complete specification with implementation plan  
+**Next Milestone:** Parser Development (Phase 0, Months 1-3)  
+**Timeline:** 12-18 months to production oracle
 
-## 🔬 Validation
+## Project Phases
 
-Three frozen-input notebooks proving framework works:
-- **Terra/Luna** (April 2022): Expected C_Σ ≈ 0.27 ± 0.05
-- **The DAO** (June 2016): Expected C_Σ ≈ 0.56 ± 0.05
-- **Mt. Gox** (2014): Expected C_Σ ≈ 0.31 ± 0.06
+### Phase 0: Parser Development (Months 1-3)
+Build blockchain-specific data extractors:
+- `blockchain_parsers/alpha.py` - Protocol claims parser
+- `blockchain_parsers/beta.py` - On-chain metrics parser
+- `blockchain_parsers/gamma.py` - Usage patterns parser
 
-See [`notebooks/validation/`](notebooks/validation/) for details.
+**Success criteria:** Extract features from 5 chains in <30 minutes
 
-## 🏗️ Project Structure
+### Phase 1a: Validation Notebooks (Months 4-6)
+Prove TSC detects historical failures:
+- Terra/Luna (April 2022): Expected C_Σ ≈ 0.27 ± 0.10
+- The DAO (June 2016): Expected C_Σ ≈ 0.56 ± 0.10
+- Mt. Gox (2014): Expected C_Σ ≈ 0.31 ± 0.10
+
+**Critical gate:** Must pass validation before building infrastructure
+
+### Phase 1b: Oracle Infrastructure (Months 7-12)
+- Smart contract deployment
+- REST API
+- Ethereum monitoring
+
+### Phase 1c: Production Launch (Months 13-18)
+- Multi-chain support (5-10 chains)
+- Pilot partnerships (bridges, lenders)
+- Public oracle service
+
+See [vision paper Section VII](docs/whitepapers/vision.md#vii-roadmap-execution-grade) for detailed roadmap.
+
+## Repository Structure
 ```
-docs/whitepapers/     # Vision paper
-notebooks/validation/  # Validation notebooks (Month 1-2)
-specs/witnesses/      # Measurement schemas
+tsc-blockchain/
+├── docs/
+│   └── whitepapers/
+│       └── vision.md              # Complete specification (v1.1.0)
+├── blockchain_parsers/            # Phase 0 deliverables
+│   ├── alpha.py                   # Protocol claims parser
+│   ├── beta.py                    # On-chain metrics parser
+│   └── gamma.py                   # Usage patterns parser
+├── notebooks/
+│   └── validation/                # Phase 1a deliverables
+│       └── README.md              # Validation plan
+├── specs/
+│   └── witnesses/
+│       └── ethereum_mainnet.yaml  # Reference schema
+├── HANDOFF.md                     # Partner onboarding guide
+└── partner_expectations.md        # Work agreement
 ```
 
-## 📚 Documentation
+## Getting Started
 
-- [Vision Paper](docs/whitepapers/vision.md) - Complete specification
-- [Ethereum Schema](specs/witnesses/ethereum_mainnet.yaml) - Reference implementation
-- [Validation Plan](notebooks/validation/README.md) - Month 1-2 deliverables
+See [HANDOFF.md](HANDOFF.md) for complete implementation guide.
 
-## 🚀 Roadmap
+## Current Status
 
 | Phase | Timeline | Status |
 |-------|----------|--------|
-| Validation Notebooks | Months 1-2 | 🔴 Not Started |
-| Oracle Infrastructure | Months 3-4 | ⚪ Pending validation |
-| Pilot Integrations | Month 5 | ⚪ Pending validation |
-| Public Launch | Month 6 | ⚪ Pending validation |
+| **Phase 0:** Parsers | Months 1-3 | 🔴 Not Started |
+| **Phase 1a:** Validation | Months 4-6 | ⚪ Pending Phase 0 |
+| **Phase 1b:** Infrastructure | Months 7-12 | ⚪ Pending Phase 1a |
+| **Phase 1c:** Production | Months 13-18 | ⚪ Pending Phase 1b |
 
-See [vision paper Section VI](docs/whitepapers/vision.md#vi-roadmap-execution-grade) for detailed roadmap.
+**Critical dependency:** Each phase contingent on previous phase success.
 
-## 📖 Core Concept
+## Key Documents
+
+- [Vision Paper](docs/whitepapers/vision.md) - Complete specification (v1.1.0)
+- [HANDOFF.md](HANDOFF.md) - Partner onboarding & implementation roadmap
+- [partner_expectations.md](partner_expectations.md) - Work agreement & checkpoints
+- [Ethereum Schema](specs/witnesses/ethereum_mainnet.yaml) - Reference implementation
+- [Validation Plan](notebooks/validation/README.md) - Historical test cases
+
+## Philosophy
 
 **Problem:** Major blockchain failures (Terra, DAO, Mt.Gox) show α/β/γ divergence before collapse
 
 **Solution:** Measure coherence C_Σ = (α_c · β_c · γ_c)^(1/3) to detect risk early
 
-**Approach:** Validate on historical data, then deploy as oracle service
+**Approach:** 
+1. Validate on historical data (Phase 0-1a)
+2. Deploy oracle if validation succeeds (Phase 1b-1c)
+3. DON'T build infrastructure without proving methodology works
 
-## 📄 License
+## License
 
 MIT License - See [LICENSE](LICENSE)
 
-## 🤝 Author
+## Acknowledgments
 
-Peter Lisovin - TSC Blockchain Project
+Built on [TSC Core framework](https://github.com/usurobor/tsc) by Peter Lisovin.
+```
+
+---
+
+## 📁 **Final Repository Structure**
+```
+tsc-blockchain/
+├── README.md                          # ✅ Updated (12-18 month timeline)
+├── LICENSE                            # ✅ Existing (MIT)
+├── HANDOFF.md                         # ✨ NEW (partner guide)
+├── partner_expectations.md            # ✨ NEW (work agreement)
+│
+├── docs/
+│   └── whitepapers/
+│       └── vision.md                  # ✅ Updated to v1.1.0
+│
+├── blockchain_parsers/                # ✨ NEW DIRECTORY
+│   ├── __init__.py
+│   ├── alpha.py                       # ✨ NEW (code skeleton)
+│   ├── beta.py                        # ✨ NEW (code skeleton)
+│   ├── gamma.py                       # ✨ NEW (code skeleton)
+│   └── tests/
+│       ├── __init__.py
+│       ├── test_alpha.py              # Partner creates
+│       ├── test_beta.py               # Partner creates
+│       └── test_gamma.py              # Partner creates
+│
+├── notebooks/
+│   └── validation/
+│       ├── README.md                  # ✅ Existing
+│       ├── terra_202204.ipynb         # Partner creates (Phase 1a)
+│       ├── dao_201606.ipynb           # Partner creates (Phase 1a)
+│       └── data/                      # Partner adds data
+│
+└── specs/
+    └── witnesses/
+        └── ethereum_mainnet.yaml      # ✅ Existing

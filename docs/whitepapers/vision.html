@@ -1,0 +1,797 @@
+<h1
+id="measuring-blockchain-coherence-from-oracle-to-consensus">Measuring
+Blockchain Coherence: From Oracle to Consensus</h1>
+<p><strong>A phased approach to making blockchains measurable and
+self-correcting</strong></p>
+<p>Peter Lisovin<br />
+TSC Blockchain Project<br />
+November 2025</p>
+<p><strong>Document Version:</strong> 1.0.0 (arXiv Ready)<br />
+<strong>Status:</strong> Complete Specification with Validation
+Plan<br />
+<strong>Next Milestone:</strong> Validation notebooks (Month 1-2)<br />
+<strong>Phase 1 Timeline:</strong> 6 months to production oracle
+(contingent on validation)</p>
+<p><strong>Keywords:</strong> blockchain measurement, coherence, DeFi
+risk, reproducibility, zero-knowledge</p>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>Major blockchain blow-ups share one symptom: α (protocol claims), β
+(economic/implementation reality), and γ (emergent usage) diverge well
+before loss. No standard tool measures that divergence. We propose a
+two-phase program built on Triadic Self-Coherence (TSC):</p>
+<ol type="1">
+<li><p><strong>Coherence Oracle (Phase-1):</strong> Specification for
+off-chain measurement and on-chain attestation of per-chain coherence
+C_Σ. Validation planned for Month 1-2.</p></li>
+<li><p><strong>Proof-of-Coherence (Phase-2):</strong> A checkpoint
+validity rule layered on PoS/PBFT requiring C_Σ ≥ Θ or friction
+improvement Δλ_Σ ≥ δ.</p></li>
+</ol>
+<p>Phase-1 specification provides the framework; the validation
+notebooks prove whether the framework works as designed.</p>
+<hr />
+<h2 id="i.-the-observable-pattern">I. The Observable Pattern</h2>
+<h3 id="operational-definitions">1.1 Operational Definitions</h3>
+<p>Given a time window W on a chain:</p>
+<ul>
+<li><strong>α (Protocol/Pattern):</strong> Promised properties—security
+claims, tokenomics, governance process, performance targets.</li>
+<li><strong>β (Economics/Relation):</strong> Deployed code and
+state—stake distribution, fee/MEV dynamics, realized performance.</li>
+<li><strong>γ (Usage/Process):</strong> Trajectory—transaction mix,
+retention/turnover, upgrade adoption, incident timelines.</li>
+</ul>
+<p>We compute α_c, β_c, γ_c ∈ [0,1] and aggregate:</p>
+<p><strong>C_Σ = (α_c · β_c · γ_c)^(1/3), λ_Σ = -ln(max(C_Σ,
+ε))</strong></p>
+<p>with numerical floor <strong>ε = 10^(-12)</strong>.</p>
+<p><strong>Degeneracy guard:</strong> If any axis is 0, C_Σ = 0 (no
+compensation from other axes).</p>
+<p><strong>Default thresholds:</strong> - Production ≥ 0.80 - Watch
+0.60-0.80 - Hazard 0.40-0.60 - Critical &lt; 0.40</p>
+<h3 id="case-studies-projected-scores-based-on-tsc-framework">1.2 Case
+Studies (Projected Scores Based on TSC Framework)</h3>
+<h4 id="terraluna-pre-collapse-april-2022">Terra/Luna (pre-collapse,
+April 2022):</h4>
+<ul>
+<li><strong>Projected score:</strong> C_Σ ≈ 0.27 ± 0.05 (Critical)</li>
+<li><strong>Basis:</strong> Estimated using TSC framework on known
+facts:
+<ul>
+<li>α_c ≈ 0.65 (protocol claims documented)</li>
+<li>β_c ≈ 0.08 (Anchor sustainability ratio, reserve coverage)</li>
+<li>γ_c ≈ 0.38 (usage patterns showed stress)</li>
+</ul></li>
+<li><strong>Status:</strong> TO BE VALIDATED in notebook (Month
+1-2)</li>
+<li>Validation will either confirm score or refine methodology</li>
+</ul>
+<h4 id="the-dao-june-2016">The DAO (June 2016):</h4>
+<ul>
+<li><strong>Projected score:</strong> C_Σ ≈ 0.56 ± 0.05 (Hazard)</li>
+<li><strong>Basis:</strong> β (implementation vs claim) dominated
+risk</li>
+<li><strong>Status:</strong> TO BE VALIDATED in notebook (Month
+1-2)</li>
+</ul>
+<h4 id="bitcoin-identity-drift-cashgold">Bitcoin Identity Drift
+(cash→gold):</h4>
+<ul>
+<li><strong>Projected score:</strong> C_Σ ≈ 0.66 (Watch)</li>
+<li><strong>Basis:</strong> Functional chain, measurable narrative
+drift</li>
+<li><strong>Status:</strong> TO BE VALIDATED in notebook (Month
+1-2)</li>
+</ul>
+<p><strong>All values are projections.</strong> Month 1-2 notebooks will
+compute scores from frozen snapshots; <strong>if they differ by
+&gt;±0.05, we tune witnesses before any infrastructure
+spend</strong>.</p>
+<hr />
+<h2 id="ii.-minimal-tsc-we-actually-implement">II. Minimal TSC We
+Actually Implement</h2>
+<h3 id="ii.1-articulation-features-per-chain">II.1 Articulation →
+Features (Per Chain)</h3>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Minimal Feature Set (Measurable Today)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>α (claims)</strong></td>
+<td>Supply schedule; finality targets; fee model; governance powers
+&amp; thresholds; security assumptions; declared economic
+invariants</td>
+</tr>
+<tr>
+<td><strong>β (reality)</strong></td>
+<td>Verified bytecode &amp; admin rights; validator set &amp; stake
+concentration; realized latency/finality/throughput; MEV/fee stats;
+token distribution (Gini); treasury flows; peg/collateral ratios</td>
+</tr>
+<tr>
+<td><strong>γ (usage)</strong></td>
+<td>Tx taxonomy; holding vs spending; call-graph motifs;
+retention/turnover; L2 routing; upgrade adoption cadence; incident
+markers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ii.2-witness-functions-simplified-for-validation">II.2 Witness
+Functions (Simplified for Validation)</h3>
+<p>We compute distances and convert them to scores s ∈ [0,1].</p>
+<p><strong>W_αβ (claims ↔︎ implementation):</strong> - Coverage: What
+fraction of α properties have checks? - Pass rate: What fraction of
+checks pass? - Severity: Penalize critical failures - Score: α_c =
+w₁·(coverage) + w₂·(pass_rate) - w₃·(severity_penalty), clipped to
+[0,1]</p>
+<p><strong>W_βγ (incentives ↔︎ behavior):</strong> - Expected use-mix p
+from β (fees, yields, latency) - Observed mix q from γ (actual
+transaction types) - Distance: Earth Mover’s Distance d = EMD(p, q),
+normalized to [0,1] - Score: β_c = 1 - d</p>
+<p><strong>W_γα (behavior ↔︎ intent):</strong> - Reference signature u(t)
+from α (intended usage pattern) - Observed trajectory v(t) from γ
+(actual behavior over time) - Distance: Normalized edit distance between
+sequences - Score: γ_c = 1 - norm_dist(u, v)</p>
+<p><strong>Future work:</strong> More sophisticated witnesses (optimal
+transport, graph matching) may be explored in Phase 2 after base
+framework is validated.</p>
+<h3 id="ii.3-global-witness-gates">II.3 Global Witness Gates</h3>
+<ul>
+<li><strong>S₃ symmetry:</strong> C_Σ invariant under axis permutation
+(within tolerance τ_sym)</li>
+<li><strong>Stability:</strong> VRF-seeded repeats; variance ≤
+τ_var</li>
+<li><strong>Budget (Phase-1: report-only; Phase-2: enforced):</strong>
+Report B and η = Δλ_Σ / B each run. In Phase-2, require B ≤ B_max and η
+≥ η_min.</li>
+</ul>
+<p><strong>Missing-data policy:</strong> Primitives that cannot be
+computed in a window are marked NA; their declared weights are added to
+an axis penalty bucket (no imputation). The NA mask is written to
+provenance.</p>
+<hr />
+<h2 id="iii.-phase-1-coherence-oracle-specification">III. Phase-1 —
+Coherence Oracle (Specification)</h2>
+<h3 id="iii.1-architecture-data-flow">III.1 Architecture (Data
+Flow)</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                     BLOCKCHAIN ECOSYSTEMS                    │
+│  Ethereum │ Bitcoin │ Arbitrum │ Optimism │ [New Chain]     │
+└──────┬───────┬───────────┬──────────┬────────────┬───────────┘
+       │       │           │          │            │
+       └───────┴───────────┴──────────┴────────────┘
+                          │
+            ┌─────────────▼──────────────┐
+            │   ADAPTER LAYER            │  (RPC, Graph, APIs)
+            └─────────────┬──────────────┘
+                          │
+            ┌─────────────▼──────────────┐
+            │  ARTICULATION BUILDERS     │  α/β/γ → features
+            └─────────────┬──────────────┘
+                          │
+            ┌─────────────▼──────────────┐
+            │   WITNESS COMPUTATION      │  W_αβ, W_βγ, W_γα
+            │   (coverage/EMD/edit-dist) │
+            └─────────────┬──────────────┘
+                          │
+            ┌─────────────▼──────────────┐
+            │   COHERENCE CORE           │  α_c, β_c, γ_c → C_Σ, λ_Σ
+            │   gates: S₃, VAR, Budget   │
+            └─────────────┬──────────────┘
+                          │
+                ┌─────────▼─────────┐
+                │  ATTESTATION      │  (provenance JSON)
+                └─────────┬─────────┘
+                          │
+                ┌─────────▼─────────┐
+                │  ORACLE SMART CT  │  publishes (C_Σ, λ_Σ, provHash)
+                └───────────────────┘</code></pre>
+<h3 id="iii.2-interfaces">III.2 Interfaces</h3>
+<p><strong>On-chain ABI:</strong></p>
+<pre class="solidity"><code>interface ICoherenceOracle {
+  struct Report {
+    uint64  chainId;
+    uint64  blockNumber;
+    uint32  methodId;
+    uint32  semver;
+    uint64  Csigma_milli;    // C_Σ × 1000
+    uint64  lambda_milli;    // λ_Σ × 1000
+    bytes32 provHash;        // provenance bundle hash
+  }
+  
+  function latest(uint64 chainId) external view returns (Report memory);
+  function verify(Report calldata r) external view returns (bool);
+}</code></pre>
+<p><strong>REST API:</strong></p>
+<pre><code>GET /v1/coherence/{chain}
+→ { C_Σ, λ_Σ, α_c, β_c, γ_c, trend_7d, methodId, provenance_url }</code></pre>
+<h3 id="iii.3-cadence-slos-tiered">III.3 Cadence &amp; SLOs
+(Tiered)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 39%" />
+<col style="width: 26%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Wall Time SLO</th>
+<th>Cost SLO</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Standard</strong> (hot cache)</td>
+<td>≤ 60s</td>
+<td>≤ $1</td>
+<td>Primary consumption tier</td>
+</tr>
+<tr>
+<td><strong>Deep analysis</strong> (optional)</td>
+<td>≤ 5 min</td>
+<td>≤ $5</td>
+<td>Adds heavier γ features, MEV</td>
+</tr>
+<tr>
+<td><strong>Cold start</strong> (first run)</td>
+<td>≤ 10 min</td>
+<td>≤ $10</td>
+<td>First run initialization</td>
+</tr>
+<tr>
+<td><strong>Reproducibility</strong></td>
+<td>N/A</td>
+<td>N/A</td>
+<td>≥99.99% identical C_Σ for frozen inputs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="iii.4-budget-efficiency-gate-example">III.4 Budget-Efficiency
+Gate: Example</h3>
+<p><strong>Phase-1 defaults:</strong> - B_max = 10^6 gas-equivalent
+units - η_min = 10^(-6) (realistic threshold; will tune on testnet)</p>
+<p><strong>Example (Standard tier):</strong></p>
+<p>Estimated costs: - RPC queries (~100 calls): ~$0.10 - Computation
+(coverage checks, EMD, edit distance): ~$0.02 - On-chain attestation
+(50k gas @ 20 gwei): ~$2-4 - Storage (IPFS): ~$0.01 - <strong>Total
+budget B: ~$2.50-4.50</strong></p>
+<p>Estimated improvement: - Before: C_Σ = 0.82 → λ_Σ = 0.198 - After:
+C_Σ = 0.84 → λ_Σ = 0.174 - <strong>Improvement: Δλ_Σ ≈
+0.024</strong></p>
+<p>Budget-efficiency:</p>
+<pre><code>η = Δλ_Σ / B ≈ 0.024 / 4.00 ≈ 6×10^(-3)</code></pre>
+<p>Gate check: η ≥ η_min = 10^(-6)?<br />
+✓ <strong>YES</strong> (3 orders of magnitude headroom)</p>
+<p><strong>Units:</strong> In Phase-1 the gate uses reported USD cost
+per checkpoint (operator-auditable via invoices); Phase-2 migrates to a
+gas-equivalent or fixed budget unit (with published weights) for
+cross-chain comparability.</p>
+<p>We will log (Δλ_Σ, B, η) alongside each attestation.</p>
+<p><strong>Note:</strong> These are engineering estimates. Actual costs
+will be measured during implementation.</p>
+<h3 id="iii.5-validation-strategy-why-notebooks-first">III.5 Validation
+Strategy: Why Notebooks First</h3>
+<p>The validation notebooks are <strong>THE critical first
+deliverable</strong> because they establish whether the TSC framework
+works as specified. This is a deliberate fork in the development
+path.</p>
+<h4 id="why-notebooks-before-infrastructure">Why Notebooks Before
+Infrastructure?</h4>
+<ol type="1">
+<li><strong>Proves concept:</strong> Can TSC detect incoherence
+retroactively?</li>
+<li><strong>Calibrates methodology:</strong> Do scores match expected
+ranges?</li>
+<li><strong>Validates degeneracy:</strong> Does low β_c collapse C_Σ as
+theory predicts?</li>
+<li><strong>Establishes reproducibility:</strong> Can independent teams
+get same scores?</li>
+</ol>
+<h4 id="the-fork-two-possible-outcomes">The Fork: Two Possible
+Outcomes</h4>
+<p><strong>Outcome A: Validation Succeeds</strong> - Terra produces C_Σ
+≈ 0.27 ± 0.05 (critical threshold) - DAO produces C_Σ ≈ 0.56 ± 0.05
+(hazard threshold) - Scores are reproducible (99%+ match across runs) -
+All global gates pass (S₃, variance, budget)</p>
+<p><strong>→ PROCEED:</strong> Build oracle infrastructure (Months
+3-4)<br />
+<strong>→ Framework proven, specification validated</strong><br />
+<strong>→ Risk: LOW</strong> (methodology works)</p>
+<p><strong>Outcome B: Validation Reveals Issues</strong> - Terra
+produces C_Σ = 0.65 (not critical as expected) - OR scores not
+reproducible (variance &gt;5%) - OR witness functions need tuning</p>
+<p><strong>→ ITERATE:</strong> Refine methodology (additional 2-4
+weeks)<br />
+<strong>→ Framework needs adjustment, specification
+revised</strong><br />
+<strong>→ Risk: MEDIUM</strong> (learn what needs fixing)</p>
+<h4 id="what-we-learn-from-outcome-b">What We Learn from Outcome B:</h4>
+<ul>
+<li>Which witnesses need recalibration</li>
+<li>Whether tolerances are too tight/loose</li>
+<li>If additional α/β/γ features are needed</li>
+<li>How to improve reproducibility</li>
+</ul>
+<p><strong>Either outcome is valuable.</strong> Success proves the
+framework; failure teaches us how to improve it. This is why validation
+comes BEFORE infrastructure investment.</p>
+<p><strong>If validation criteria are not met:</strong> tune
+witnesses/tolerances and re-measure before any infrastructure spend.</p>
+<h4 id="deliverables-month-1-2">Deliverables (Month 1-2):</h4>
+<p>Three public notebooks demonstrating reproducible retroactive
+measurement:</p>
+<ol type="1">
+<li><strong>Terra/Luna notebook</strong>
+<ul>
+<li><strong>Snapshot anchor:</strong> as_of: 2022-04-15T00:00:00Z</li>
+<li>Expected: C_Σ ≈ 0.27 ± 0.05</li>
+<li>If validated: Strong proof of concept</li>
+<li>If not: Iterate on witness functions</li>
+</ul></li>
+<li><strong>The DAO notebook</strong>
+<ul>
+<li><strong>Snapshot anchor:</strong> as_of: 2016-06-10T00:00:00Z</li>
+<li>Expected: C_Σ ≈ 0.56 ± 0.05</li>
+<li>Secondary validation of methodology</li>
+</ul></li>
+<li><strong>Mt. Gox notebook</strong>
+<ul>
+<li><strong>Snapshot anchor:</strong> as_of: 2014-02-10T00:00:00Z</li>
+<li>Expected: C_Σ ≈ 0.31 ± 0.06</li>
+<li>Bitcoin-specific validation</li>
+</ul></li>
+</ol>
+<p>All notebooks will be public (GitHub) with frozen data snapshots,
+allowing independent verification. Block heights are resolved inside
+each notebook from the UTC timestamp anchor.</p>
+<p><strong>Success criteria:</strong> - ✓ Scores within ±0.05 of
+projections - ✓ Reproducibility ≥99.99% across 10 runs with frozen
+inputs - ✓ Witness functions pass S₃, stability, budget gates - ✓
+Community can independently verify</p>
+<p><strong>Timeline: 2 weeks focused work</strong> - Days 1-3: Terra
+snapshot ingestion, freeze with hashes - Days 4-6: Implement feature
+extractors (coverage/EMD/edit-distance) - Days 7-8: Assemble
+terra.ipynb, export attestation - Days 9-10: Add DAO and Mt.Gox, verify
+reproducibility</p>
+<h3 id="iii.6-attestation-strategy-provenance-first">III.6 Attestation
+Strategy (Provenance-First)</h3>
+<p>Phase-1 relies exclusively on <strong>reproducible
+provenance</strong> (stored in IPFS/Arweave) for auditability.</p>
+<p><strong>Provenance bundle includes:</strong> - Input data hash -
+Method version (methodId) - Computation timestamp - Result (C_Σ, α_c,
+β_c, γ_c, λ_Σ) - Container image/Nix flake pin - Data source
+licenses</p>
+<p><strong>Anyone can verify:</strong> Same inputs + same method → same
+result ± tolerance</p>
+<p><strong>Zero-knowledge proofs (zk-MFI) are deferred to
+Phase-2.</strong> When measurement moves into consensus, cryptographic
+guarantees become valuable. Phase-1 commitment: Reproducible provenance
+is sufficient for oracle use case.</p>
+<h3 id="iii.7-consumption-patterns-concrete-use-cases">III.7 Consumption
+Patterns (Concrete Use Cases)</h3>
+<p><strong>Bridges:</strong> - Accept transfers &gt; $N only if C_Σ ≥
+0.80 AND β_c ≥ 0.75 - Alert when ΔC_Σ &lt; -0.10 week-over-week</p>
+<p><strong>Lenders:</strong> - Map Loan-to-Value (LTV) from C_Σ with
+floor at 0.60 - Linear interpolation between 0.60 and 0.80</p>
+<p><strong>Exchanges:</strong> - Listing gates: Require C_Σ ≥ 0.70 -
+Watchlist: Flag when C_Σ &lt; 0.60 - Delisting consideration: C_Σ &lt;
+0.40 for &gt;30 days</p>
+<hr />
+<h2 id="iv.-phase-2-proof-of-coherence-validity-layer">IV. Phase-2 —
+Proof-of-Coherence (Validity Layer)</h2>
+<p>We integrate the coherence metric as a validity rule at checkpoints.
+This is a research direction contingent on Phase-1 validation
+success.</p>
+<p><strong>Checkpoint acceptance:</strong> - If global gates pass AND
+(C_Σ ≥ Θ OR Δλ_Σ ≥ δ): <strong>accept</strong> - Else: <strong>degraded
+mode</strong> (rate-limit risky surfaces, quarantine incoherent
+contracts) until coherence recovers</p>
+<p><strong>Default parameters:</strong> - Threshold: Θ = 0.80
+(production) - Minimum improvement: δ = 0.01</p>
+<p><strong>Economic sanity:</strong> Reward proportional to leverage
+reduction (Δλ_Σ), applying Budget-Efficiency gate network-wide to
+prevent “buying” coherence with unbounded compute.</p>
+<p><strong>Research questions for Phase-2:</strong> 1. Checkpoint
+frequency optimization 2. Challenge window design 3. Validator economic
+game theory 4. Migration path (L2 first, then L1) 5. ZK-proof
+integration</p>
+<p><strong>Timeline:</strong> 12-18 months after Phase-1 validation.</p>
+<hr />
+<h2 id="v.-why-this-works-engineers-criteria">V. Why This Works
+(Engineer’s Criteria)</h2>
+<p>TSC is effective because it:</p>
+<ul>
+<li><strong>Measures the failure mode.</strong> α/β/γ aren’t opinions;
+they’re feature sets tied to code, state, and usage.</li>
+<li><strong>Reproducible.</strong> Provenance bundle makes “same inputs
+→ same numbers” enforceable.</li>
+<li><strong>Cheap to consume.</strong> Downstream logic needs a scalar
+and a breakdown.</li>
+<li><strong>Incremental.</strong> Phase-1 pipelines are exactly what
+Phase-2 needs.</li>
+</ul>
+<h3 id="v.1-how-this-relates-to-existing-tools">V.1 How This Relates to
+Existing Tools</h3>
+<p>TSC <strong>complements</strong> existing infrastructure:</p>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 52%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tool</th>
+<th>What It Measures</th>
+<th>TSC Adds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Chainlink</strong></td>
+<td>Price feeds, external data</td>
+<td>Chain health metrics (C_Σ as new data primitive)</td>
+</tr>
+<tr>
+<td><strong>Gauntlet/Chaos Labs</strong></td>
+<td>Economic simulation</td>
+<td>Continuous measurement of actual vs modeled (β/γ alignment)</td>
+</tr>
+<tr>
+<td><strong>Formal Verification</strong></td>
+<td>Code correctness</td>
+<td>Measures if correct code produces intended economics (α/β/γ
+coherence)</td>
+</tr>
+<tr>
+<td><strong>Audits</strong></td>
+<td>Point-in-time security</td>
+<td>Continuous monitoring, drift detection</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Integration example:</strong> DeFi protocol uses Chainlink
+for prices, Gauntlet for risk params, and TSC for collateral chain
+health. If TSC reports C_Σ &lt; 0.60 for a bridged chain, Gauntlet
+adjusts LTV down. Three complementary layers.</p>
+<h3 id="v.2-what-tsc-does-not-measure">V.2 What TSC Does Not
+Measure</h3>
+<p>TSC measures coherence (whether claims/economics/usage fit together),
+<strong>not:</strong> - Absolute security (use audits) - Code
+correctness (use formal verification) - Market legitimacy (use due
+diligence) - Price accuracy (use oracles)</p>
+<p>TSC complements these tools by adding dimensional consistency
+measurement.</p>
+<h3 id="v.3-what-could-go-wrong-honest-risk-assessment">V.3 What Could
+Go Wrong (Honest Risk Assessment)</h3>
+<p><strong>Validation risks (Month 1-2):</strong></p>
+<ol type="1">
+<li><strong>Risk: Scores don’t match projections</strong>
+<ul>
+<li>Terra produces C_Σ = 0.65 instead of 0.27</li>
+<li>Mitigation: Iterate on witness functions, adjust weights</li>
+<li>Learning: Discover which articulations need refinement</li>
+</ul></li>
+<li><strong>Risk: Poor reproducibility</strong>
+<ul>
+<li>Same input produces C_Σ = 0.27 ± 0.15 (too wide)</li>
+<li>Mitigation: Stabilize computation, add determinism checks</li>
+<li>Learning: Identify non-deterministic components</li>
+</ul></li>
+<li><strong>Risk: Data availability</strong>
+<ul>
+<li>Can’t fetch April 2022 Terra data (nodes pruned)</li>
+<li>Mitigation: Use archive nodes, blockchain explorers</li>
+<li>Fallback: Use publicly available snapshots</li>
+</ul></li>
+<li><strong>Risk: Computational cost exceeds budget</strong>
+<ul>
+<li>Measurement takes 10 hours instead of 60 seconds</li>
+<li>Mitigation: Optimize, reduce feature set, adjust SLO tier</li>
+<li>Learning: Understand actual performance characteristics</li>
+</ul></li>
+</ol>
+<p><strong>These are LEARNING opportunities, not failures.</strong> The
+specification provides the framework; validation teaches us how to
+implement it correctly.</p>
+<hr />
+<h2 id="vi.-roadmap-execution-grade">VI. Roadmap (Execution-Grade)</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 23%" />
+<col style="width: 43%" />
+</colgroup>
+<thead>
+<tr>
+<th>Timeline</th>
+<th>Focus</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Months 1-2</strong></td>
+<td><strong>CRITICAL PATH: Validation</strong></td>
+<td>Build and validate Terra/DAO/Mt.Gox notebooks. <strong>FORK: Success
+→ proceed to Month 3. Issues → iterate 2-4 weeks.</strong></td>
+</tr>
+<tr>
+<td><strong>Months 3-4</strong></td>
+<td>Oracle Infrastructure <strong>(if validated)</strong></td>
+<td>Smart contract deployment, REST API, dashboards, SLO
+instrumentation. <strong>Contingent on Month 1-2 success.</strong></td>
+</tr>
+<tr>
+<td><strong>Month 5</strong></td>
+<td>Pilots <strong>(if validated)</strong></td>
+<td>Bridge &amp; lending partners integrate; alerting on trend +
+per-axis drops. <strong>Contingent on oracle deployment.</strong></td>
+</tr>
+<tr>
+<td><strong>Month 6</strong></td>
+<td>Public Launch <strong>(if validated)</strong></td>
+<td>Production oracle service; daily measurements for top L1/L2/bridges.
+<strong>Contingent on pilot success.</strong></td>
+</tr>
+<tr>
+<td><strong>Months 7-18</strong></td>
+<td>Phase-2 Research</td>
+<td>Checkpoint mechanism, validator economics, challenge window,
+testnet. <strong>Contingent on Phase-1 success.</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Critical dependencies:</strong> - Months 3-6 are CONTINGENT
+on Month 1-2 validation success - If validation fails, timeline extends
+by 2-4 weeks for iteration - Specification provides the framework;
+notebooks prove it works</p>
+<hr />
+<h2 id="vii.-engineering-appendix">VII. Engineering Appendix</h2>
+<h3 id="minimal-α-property-vocabulary-starter">Minimal α Property
+Vocabulary (Starter)</h3>
+<p>Supply schedule; finality target; fee model; validator/committee
+bounds; governance powers &amp; thresholds; security assumptions;
+economic invariants (collateral/solvency/peg rules).</p>
+<h3 id="w_αβ-scoring-sketch">W_αβ (Scoring Sketch)</h3>
+<p>α_c = clip(w₁·(coverage) + w₂·(pass_rate) - w₃·(severity_penalty)) ∈
+[0,1]</p>
+<p>where: - coverage = (properties_with_checks) / (total_properties) -
+pass_rate = (checks_passed) / (total_checks) - severity_penalty =
+weighted sum of critical failures</p>
+<h3 id="w_βγ-distributional">W_βγ (Distributional)</h3>
+<p>Build expected use-mix p from β (fees, latency, yields). Observe q
+from transaction data. Earth Mover’s Distance: d = EMD(p, q), normalize
+to [0,1] → β_c = 1-d.</p>
+<h3 id="w_γα-drift">W_γα (Drift)</h3>
+<p>From α, derive reference signature u(t) (e.g., “cash-like”: many
+micro-payments). Compare to observed v(t) via normalized edit distance →
+γ_c = 1-norm_dist(u,v).</p>
+<h3 id="global-witness-gates">Global Witness Gates</h3>
+<ul>
+<li><strong>S₃ symmetry:</strong> Recompute C_Σ under axis permutations;
+equality within tolerance</li>
+<li><strong>Stability:</strong> VRF-seeded repeats; variance ≤
+τ_var</li>
+<li><strong>Budget:</strong> B ≤ B_max AND η = Δλ_Σ/B ≥ η_min (Phase-1
+start at 10^(-6))</li>
+</ul>
+<h3 id="oracle-policy-templates">Oracle Policy Templates</h3>
+<p><strong>Bridge large-transfer gate:</strong></p>
+<pre><code>C_Σ ≥ 0.80 ∧ β_c ≥ 0.75</code></pre>
+<p><strong>Lending LTV curve:</strong></p>
+<pre><code>LTV = 0.50 + 0.30·(C_Σ - 0.60)/0.20, clamped to [0.50, 0.80]</code></pre>
+<hr />
+<h2 id="appendix-a-scoring-primitives-deterministic">Appendix A —
+Scoring Primitives (Deterministic)</h2>
+<p>Let clip(x) = min(1, max(0, x)).</p>
+<p><strong>Two-sided range [L, U]:</strong></p>
+<pre><code>s_range(x; L, U, τ) = clip(1 - max(0, x-U, L-x) / τ)</code></pre>
+<p><strong>One-sided (≤ T):</strong></p>
+<pre><code>s_≤(x; T, τ) = clip(1 - max(0, x-T) / τ)</code></pre>
+<p><strong>One-sided (≥ T):</strong></p>
+<pre><code>s_≥(x; T, τ) = clip(1 - max(0, T-x) / τ)</code></pre>
+<p><strong>Invariant check:</strong></p>
+<pre><code>s_inv = 1 if holds else 0</code></pre>
+<p><strong>Distributional (JS divergence d ∈ [0,1]):</strong></p>
+<pre><code>s_dist = 1 - d</code></pre>
+<p><strong>Process distortion:</strong></p>
+<pre><code>s_proc = clip(1 - distortion / τ)</code></pre>
+<p>Axis scores are geometric means of their per-witness scores; C_Σ is
+the geometric mean of axis scores.</p>
+<hr />
+<h2 id="appendix-b-visual-diagrams">Appendix B — Visual Diagrams</h2>
+<h3 id="oracle-architecture">Oracle Architecture</h3>
+<p>(See Section III.1 for detailed data flow diagram)</p>
+<h3 id="coherence-trajectory-terra-2022">Coherence Trajectory (Terra
+2022)</h3>
+<pre><code>C_Σ
+1.0 │                                    
+0.9 │ ████████████ Production Threshold (0.80)
+0.8 │                                    
+0.7 │     ●━━━━━● Terra enters warning zone
+0.6 │           ●                       ▓▓▓▓▓▓ Warning (0.60-0.80)
+0.5 │             ╲                     
+0.4 │               ●  ALERT            ░░░░░░ Critical (&lt;0.40)
+0.3 │                 ╲      ●          
+0.2 │                   ●─────●  Depeg &amp; Collapse
+0.0 └── Jan  Feb  Mar  Apr  May  Jun
+        ←———————— 2022 ————————→</code></pre>
+<p><strong>Key events:</strong> - <strong>Feb 2022:</strong> C_Σ ≈ 0.72
+(functional but β_c showing strain) - <strong>Mar 2022:</strong> C_Σ ≈
+0.64 (enters warning zone) - <strong>Apr 2022:</strong> C_Σ ≈ 0.42
+(ALERT) ← <strong>TSC would flag here</strong> - <strong>May 9,
+2022:</strong> Depeg and collapse</p>
+<p><strong>Note:</strong> Projected scores; validation notebook will
+verify.</p>
+<hr />
+<h2 id="appendix-c-reference-schema-ethereum-mainnet">Appendix C —
+Reference Schema (Ethereum mainnet)</h2>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0.0&quot;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">chain</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ethereum-mainnet&quot;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">checkpoint_frequency</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;daily&quot;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">window_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">7200</span><span class="co">  # blocks (~1 day)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">alpha_requirements</span><span class="kw">:</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> block_time_target</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> range_two_sided</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">claim</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;12 s block time&quot;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">target</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">L</span><span class="kw">:</span><span class="at"> </span><span class="fl">11.0</span><span class="kw">,</span><span class="at"> </span><span class="fu">U</span><span class="kw">:</span><span class="at"> </span><span class="fl">13.0</span><span class="kw">,</span><span class="at"> </span><span class="fu">unit</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;seconds&quot;</span><span class="kw">}</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;rpc://&lt;eth-rpc&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">query</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;avg(diff(block.timestamp)) over window&quot;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weight</span><span class="kw">:</span><span class="at"> </span><span class="fl">1.0</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tolerance</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.15</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> finality_gasper</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> range_le</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">claim</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;≤2 epochs to finality&quot;</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">target</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">T</span><span class="kw">:</span><span class="at"> </span><span class="dv">900</span><span class="kw">,</span><span class="at"> </span><span class="fu">unit</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;seconds&quot;</span><span class="kw">}</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;beacon://&lt;consensus-client&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">query</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;time_to_finality_p95&quot;</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weight</span><span class="kw">:</span><span class="at"> </span><span class="fl">1.0</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tolerance</span><span class="kw">:</span><span class="at"> </span><span class="dv">300</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> validator_decentralization</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> range_le</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">claim</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;No entity &gt;25% stake&quot;</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">target</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">T</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.25</span><span class="kw">,</span><span class="at"> </span><span class="fu">unit</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;fraction&quot;</span><span class="kw">}</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;beacon://&lt;consensus-client&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">query</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;max(entity_stake_share)&quot;</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weight</span><span class="kw">:</span><span class="at"> </span><span class="fl">2.0</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tolerance</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.05</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> erc20_transfer_safety</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> invariant</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">claim</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ERC20 transfers cannot reenter&quot;</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">target</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">holds</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="kw">}</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;analyzer://mythril&quot;</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">query</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;check_invariant(&#39;no_reentrancy&#39;,&#39;transfer&#39;)&quot;</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">weight</span><span class="kw">:</span><span class="at"> </span><span class="fl">2.0</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="fu">beta_sources</span><span class="kw">:</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">rpc_endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://&lt;eth-rpc&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">beacon_endpoint</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;https://&lt;beacon-api&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">gas_market</span><span class="kw">:</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">source</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;etherscan/gastracker&quot;</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">metrics</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;base_fee&quot;</span><span class="kw">,</span><span class="st">&quot;priority_fee_p50&quot;</span><span class="kw">,</span><span class="st">&quot;priority_fee_p95&quot;</span><span class="kw">]</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">token_distribution</span><span class="kw">:</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">source</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;etherscan/tokenholders&quot;</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">metrics</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;top10_concentration&quot;</span><span class="kw">,</span><span class="st">&quot;gini_coefficient&quot;</span><span class="kw">]</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="fu">gamma_features</span><span class="kw">:</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> tx_type_distribution</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> distribution</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">baseline</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;s3://baselines/eth_txmix.parquet&quot;</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">current</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;query: tx_type_histogram over window&quot;</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">distance_metric</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;jensen_shannon&quot;</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;rpc://&lt;eth-rpc&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> gas_usage_stability</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> process</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">metric</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;coefficient_of_variation(base_fee)&quot;</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">threshold</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">le</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.5</span><span class="kw">}</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;etherscan/gastracker&quot;</span></span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> validator_participation</span></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> range_ge</span></span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">target</span><span class="kw">:</span><span class="at"> </span><span class="kw">{</span><span class="fu">T</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.95</span><span class="kw">,</span><span class="at"> </span><span class="fu">unit</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;fraction&quot;</span><span class="kw">}</span></span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">datasource</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;beacon://&lt;consensus-client&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">query</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;active_validators / total_validators&quot;</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a><span class="fu">scoring_config</span><span class="kw">:</span></span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">primitives</span><span class="kw">:</span></span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">range_two_sided</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1 - max(0, max(x-U, L-x))/τ&quot;</span></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">range_le</span><span class="kw">:</span><span class="at">        </span><span class="st">&quot;1 - max(0, x-T)/τ&quot;</span></span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">range_ge</span><span class="kw">:</span><span class="at">        </span><span class="st">&quot;1 - max(0, T-x)/τ&quot;</span></span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">invariant</span><span class="kw">:</span><span class="at">       </span><span class="st">&quot;1 if holds else 0&quot;</span></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">distribution</span><span class="kw">:</span><span class="at">    </span><span class="st">&quot;1 - JS_divergence(current, baseline)&quot;</span></span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">process</span><span class="kw">:</span><span class="at">         </span><span class="st">&quot;1 - distortion/τ&quot;</span></span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">aggregation</span><span class="kw">:</span></span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">axis_scores</span><span class="kw">:</span><span class="at">     </span><span class="st">&quot;geometric_mean&quot;</span></span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">global</span><span class="kw">:</span><span class="at">          </span><span class="st">&quot;geometric_mean(alpha_c, beta_c, gamma_c)&quot;</span></span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">thresholds</span><span class="kw">:</span></span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">production</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.80</span></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">warning</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.60</span></span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">critical</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.40</span></span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a><span class="fu">provenance</span><span class="kw">:</span></span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">method_version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;tsc-oracle-v1.0.0&quot;</span></span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">schema_version</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;1.0.0&quot;</span></span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">implementation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;github.com/tsc-blockchain/oracle@&lt;commit&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">frozen_inputs_hash</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;sha256:&lt;blob&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">container_image</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ghcr.io/tsc/oracle@sha256:&lt;digest&gt;&quot;</span><span class="co">  # placeholder</span></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">licenses</span><span class="kw">:</span></span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;etherscan_terms_v2025-01&quot;</span></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;beacon_api_terms_v2025-02&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="references-availability">References &amp; Availability</h2>
+<ul>
+<li>Triadic Self-Coherence (TSC) framework (2024). Mathematical
+foundations and axioms.</li>
+<li>Coherent Blockchain (2025). Protocol direction and leverage-based
+gating.</li>
+<li>Incident reports: Terra/Luna post-mortems, The DAO reentrancy
+analyses, archival Bitcoin studies.</li>
+<li>Earth Mover’s Distance: Rubner, Y., Tomasi, C., &amp; Guibas, L. J.
+(2000). The Earth Mover’s Distance as a metric for image retrieval.
+<em>International Journal of Computer Vision</em>.</li>
+<li>Edit distance: Wagner, R. A., &amp; Fischer, M. J. (1974). The
+string-to-string correction problem. <em>Journal of the ACM</em>.</li>
+</ul>
+<p>A full bibliography with DOIs/URLs will be included in the arXiv
+submission.</p>
+<hr />
+<h2 id="arxiv-submission-checklist">ArXiv Submission Checklist</h2>
+<ul>
+<li><strong>Categories:</strong> <code>cs.CR</code> (Cryptography and
+Security), <code>cs.DC</code> (Distributed Computing)</li>
+<li><strong>Keywords:</strong> blockchain measurement, coherence, DeFi
+risk, reproducibility, zero-knowledge</li>
+<li><strong>Source:</strong> LaTeX or PDF from Markdown</li>
+<li><strong>Include:</strong> <code>.bib</code> with 5-8 core references
+(TSC framework, Terra/DAO post-mortems, EMD/edit-distance
+citations)</li>
+<li><strong>Artifacts:</strong> Link to validation notebooks repo when
+ready</li>
+<li><strong>Diagrams:</strong> Replace ASCII diagrams with vector PDFs
+if possible</li>
+<li><strong>Math rendering:</strong> Uses Unicode symbols for GitHub;
+convert to LaTeX for arXiv</li>
+<li><strong>Placeholders:</strong> Clearly marked in schema (e.g.,
+<code>&lt;eth-rpc&gt;</code>, <code>&lt;commit&gt;</code>,
+<code>&lt;blob&gt;</code>, <code>&lt;digest&gt;</code>)</li>
+</ul>
+<hr />
+<h2 id="conclusion">Conclusion</h2>
+<p>Phase-1 specification provides a complete framework for measuring
+blockchain coherence. The validation notebooks (Month 1-2) will prove
+whether this framework works as designed. If validation succeeds, we
+proceed to build the oracle infrastructure. If validation reveals
+issues, we iterate on the methodology with clear data about what needs
+adjustment.</p>
+<p><strong>This honest, empirical approach is how engineering
+works:</strong> specify, validate, iterate, deploy.</p>
+<p><strong>Next artifact to ship:</strong> Three frozen-input notebooks
+proving TSC framework can retroactively detect coherence collapse before
+financial loss: - <code>terra_2022-04-15.ipynb</code> — target C_Σ ≈
+0.27 ± 0.05 - <code>dao_2016-06-10.ipynb</code> — target C_Σ ≈ 0.56 ±
+0.05 - <code>mtgox_2014-02-10.ipynb</code> — target C_Σ ≈ 0.31 ±
+0.06</p>
+<p>Each outputs: - <code>attestation.json</code> (scores, CI, gates,
+cause map, B, η) - <code>provenance.json</code> (input hashes, method
+versions, seeds, container digest, licenses)</p>
+<hr />
+<p><strong>End of v1.0.0</strong></p>
