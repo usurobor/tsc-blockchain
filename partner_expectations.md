@@ -1,7 +1,7 @@
 # TSC Blockchain - Partner Work Agreement
 
 **Effective Date:** November 2025  
-**Partners:** Peter Lisovin (TSC Core) + [Partner Name] (TSC Blockchain)  
+**Partners:** Peter Lisovin (TSC Core) + Renfei Zou (TSC Blockchain)  
 **Project Duration:** 12-18 months (Phase 0-1c)  
 **Review Frequency:** Monthly
 
@@ -563,7 +563,7 @@ Date: ___________________
 
 **TSC Blockchain Partner:**
 
-Name: [Partner Name]  
+Name: Renfei Zou  
 Signature: ___________________  
 Date: ___________________
 

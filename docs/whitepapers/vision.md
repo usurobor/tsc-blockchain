@@ -4,7 +4,7 @@
 **Date:** November 2025  
 **Status:** Specification with validation plan
 
-**Authors:** Peter Lisovin (TSC Core), [Partner Name] (Implementation)
+**Authors:** Peter Lisovin (TSC Core), Renfei Zou (Implementation)
 
 ---
 
